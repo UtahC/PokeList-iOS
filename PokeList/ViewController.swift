@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import Alamofire
+import SwiftyJSON
 
 extension NSDate {
     struct Formatter {
@@ -75,12 +77,15 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // start the timer
         timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(actionMethod), userInfo: nil, repeats: true)
         
-        tableView.visibleCells
-        
-        
     }
     
     func actionMethod() {
+//        var removedElement : PokemonInfo?
+//        repeat {
+//            if pokemons.first!.until.timeIntervalSinceNow < 0 {
+//                removedElement = pokemons.removeFirst()
+//            }
+//        } while (removedElement != nil)
         tableView.reloadData()
     }
 
@@ -90,113 +95,95 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     // 必須實作的方法：每一組有幾個 cell
-    func tableView(tableView: UITableView,
-                   numberOfRowsInSection section: Int) -> Int {
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return pokemons.count
     }
     
     // 必須實作的方法：每個 cell 要顯示的內容
-    func tableView(tableView: UITableView,
-                   cellForRowAtIndexPath indexPath: NSIndexPath)
-        -> UITableViewCell {
-            // 取得 tableView 目前使用的 cell
-            let cell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "Cell")
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        // 取得 tableView 目前使用的 cell
+        let cell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "Cell")
+        
+        // 設置 Accessory 按鈕樣式
+        cell.accessoryType = .DisclosureIndicator
+        
+        // 顯示的內容
+        if let label = cell.textLabel {
+            label.text = "\(pokemons[indexPath.row].name)"
+        }
+        
+        let fileName = pokemons[indexPath.row].icon.characters.split("/").map(String.init).last!
+        cell.imageView?.image = UIImage(named: fileName.characters.split(".").map(String.init).first!)
+        
+        var subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 0))
+        subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
+        subLabel.font = subLabel.font.fontWithSize(12)
+        subLabel.text = String("in \(Int(pokemons[indexPath.row].until.timeIntervalSinceNow)) sec")
+        
+        cell.addSubview(subLabel)
+        
+        subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 12))
+        subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
+        subLabel.font = subLabel.font.fontWithSize(12)
+        subLabel.text = String(format: "Lat: %10f", pokemons[indexPath.row].coords.latitude)
+        
+        cell.addSubview(subLabel)
+        
+        subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 24))
+        subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
+        subLabel.font = subLabel.font.fontWithSize(12)
+        subLabel.text = String(format: "Lng: %10f", pokemons[indexPath.row].coords.longitude)
+        
+        cell.addSubview(subLabel)
+        
+        if pokemons[indexPath.row].until.timeIntervalSinceNow < 0 {
+            cell.hidden = true
+        }
+        
+        return cell
+    }
+    
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        
+        var rowHeight:CGFloat = 0.0
+        
+        if pokemons[indexPath.row].until.timeIntervalSinceNow < 0 {
+            rowHeight = 0.0
             
-            // 設置 Accessory 按鈕樣式
-            if indexPath.section == 1 {
-                if indexPath.row == 0 {
-                    cell.accessoryType = .Checkmark
-                } else if indexPath.row == 1 {
-                    cell.accessoryType = .DetailButton
-                } else if indexPath.row == 2 {
-                    cell.accessoryType =
-                        .DetailDisclosureButton
-                } else if indexPath.row == 3 {
-                    cell.accessoryType = .DisclosureIndicator
-                }
-            }
-            
-//            if indexPath.row % 2 == 1 {
-//                cell.backgroundColor = UIColor.grayColor()
-//            }
-            
-            // 顯示的內容
-            if let label = cell.textLabel {
-                label.text = "\(pokemons[indexPath.row].name)"
-            }
-            
-//            if let detail = cell.detailTextLabel {
-//                detail.text = "in \(Int(pokemons[indexPath.row].until.timeIntervalSinceNow)) seconds"
-//            }
-//            var origin = CGPoint(x: cell.bounds.origin.x, y: cell.bounds.origin.y)
-//            origin.y = origin.y + cell.bounds.height - 20
-            
-//            let url = NSURL(fileURLWithPath: "001.png")
-//            if let data = NSData(contentsOfURL: url)
-//            {
-//                cell.imageView?.image = UIImage(data: data)
-//            }
-            
-            let fileName = pokemons[indexPath.row].icon.characters.split("/").map(String.init).last!
-            cell.imageView?.image = UIImage(named: fileName.characters.split(".").map(String.init).first!)
-            
-            var subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 0))
-            subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
-            subLabel.font = subLabel.font.fontWithSize(12)
-            subLabel.text = String("in \(Int(pokemons[indexPath.row].until.timeIntervalSinceNow)) sec")
-            
-            cell.addSubview(subLabel)
-            
-            subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 12))
-            subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
-            subLabel.font = subLabel.font.fontWithSize(12)
-            subLabel.text = String(format: "Lat: %10f", pokemons[indexPath.row].coords.latitude)
-            
-            cell.addSubview(subLabel)
-            
-            subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 24))
-            subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
-            subLabel.font = subLabel.font.fontWithSize(12)
-            subLabel.text = String(format: "Lng: %10f", pokemons[indexPath.row].coords.longitude)
-            
-            cell.addSubview(subLabel)
-            
-            return cell
+        }
+        else {
+            rowHeight = 55.0    //or whatever you like
+        }
+        
+        return rowHeight
     }
     
     func getData() {
-        let postEndpoint: String = "http://pokesnipers.com/api/v1/pokemon.json"
-        let url = NSURL(string: postEndpoint)!
-        
-        var urlContents: NSString?
-        do {
-            urlContents = try NSString(contentsOfURL: url, encoding: NSUTF8StringEncoding)
-            let jsonRoot =
-                try NSJSONSerialization.JSONObjectWithData(urlContents!.dataUsingEncoding(NSUTF8StringEncoding)!, options: .AllowFragments)
-            let jsonArray = jsonRoot["results"] as! [[String: AnyObject]]
-            for var jsonObj in jsonArray {
-                let id = jsonObj["id"] as! Int
-                let name = jsonObj["name"] as! String
-                let coordsString = jsonObj["coords"] as! String!
-                let lat = Double(coordsString.characters.split(",").map(String.init)[0])
-                let lng = Double(coordsString.characters.split(",").map(String.init)[1])
-                let coords = Coordinate(latitude: lat!, longitude: lng!)
-                let until = (jsonObj["until"] as! String).dateFromISO8601!
-                var iv = 0
-                if jsonObj["iv"] != nil {
-                    iv = jsonObj["iv"] as! Int
-                }
-                let attacks: [String?] = [nil, nil]
-                let icon = jsonObj["icon"] as! String
-                let rarity = jsonObj["rarity"] as! String
-                let pokeInfo = PokemonInfo(id: id, name: name, coords: coords, until: until, iv: iv, attacks: attacks, icon: icon, rarity: rarity)
-                pokemons.append(pokeInfo)
+        let endpoint: String = "http://pokesnipers.com/api/v1/pokemon.json"
+        Alamofire.request(.GET, endpoint)
+          .responseJSON(completionHandler: { response in
+            guard response.result.error == nil else {
+                print("response = nil")
+                exit(0)
             }
-        }
-        catch {
-            print("read failed")
-        }
-        //print(urlContents)
+            if let value = response.result.value {
+                let root = JSON(value)
+                let arr = root["results"].array!
+                for var obj in arr {
+                    let id = obj["id"].int!
+                    let name = obj["name"].string!
+                    let coords = Coordinate(coordsStr: obj["coords"].string!)
+                    let until = obj["until"].string!.dateFromISO8601!
+                    let iv = obj["iv"].int!
+                    let attacks = [obj["attacks"][0].string, obj["attacks"][1].string]
+                    let icon = obj["icon"].string!
+                    let rarity = obj["rarity"].string!
+                    let pokeInfo = PokemonInfo(id: id, name: name, coords: coords, until: until, iv: iv, attacks: attacks, icon: icon, rarity: rarity)
+                    self.pokemons.append(pokeInfo)
+                }
+                
+            }
+        })
     }
     
     class PokemonInfo {
@@ -224,5 +211,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     struct Coordinate {
         var latitude: Double
         var longitude: Double
+        
+        init (coordsStr: String) {
+            let arr = coordsStr.characters.split(",").map(String.init)
+            latitude = Double(arr[0])!
+            longitude = Double(arr[1])!
+        }
     }
 }
