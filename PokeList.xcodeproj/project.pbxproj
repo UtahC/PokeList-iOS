@@ -16,6 +16,7 @@
 		D5ECB2AF1D70708700330F76 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D5ECB2AD1D70708700330F76 /* LaunchScreen.storyboard */; };
 		D5ECB2BA1D70708700330F76 /* PokeListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5ECB2B91D70708700330F76 /* PokeListTests.swift */; };
 		D5ECB2C51D70708700330F76 /* PokeListUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5ECB2C41D70708700330F76 /* PokeListUITests.swift */; };
+		D5ECB2D51D78491800330F76 /* PokemonViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5ECB2D41D78491800330F76 /* PokemonViewController.swift */; };
 		EAF00ACFD6DA8AA4F67ADFC5 /* Pods_PokeListTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09075A17B433A5E6283842CC /* Pods_PokeListTests.framework */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +59,7 @@
 		D5ECB2C01D70708700330F76 /* PokeListUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PokeListUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D5ECB2C41D70708700330F76 /* PokeListUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PokeListUITests.swift; sourceTree = "<group>"; };
 		D5ECB2C61D70708700330F76 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D5ECB2D41D78491800330F76 /* PokemonViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PokemonViewController.swift; sourceTree = "<group>"; };
 		ED9ED8184AD4042153399C37 /* Pods-PokeListUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-PokeListUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-PokeListUITests/Pods-PokeListUITests.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -138,6 +140,7 @@
 			isa = PBXGroup;
 			children = (
 				D5ECB2A11D70708700330F76 /* AppDelegate.swift */,
+				D5ECB2D41D78491800330F76 /* PokemonViewController.swift */,
 				D5ECB2A31D70708700330F76 /* ViewController.swift */,
 				D5ECB2AB1D70708700330F76 /* Assets.xcassets */,
 				D5ECB2AD1D70708700330F76 /* LaunchScreen.storyboard */,
@@ -444,6 +447,7 @@
 			files = (
 				D5ECB2AA1D70708700330F76 /* PokeList.xcdatamodeld in Sources */,
 				D5ECB2A41D70708700330F76 /* ViewController.swift in Sources */,
+				D5ECB2D51D78491800330F76 /* PokemonViewController.swift in Sources */,
 				D5ECB2A21D70708700330F76 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

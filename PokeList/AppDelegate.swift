@@ -22,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.backgroundColor = UIColor.whiteColor()
         let mainViewController = ViewController()
         let navigationController = UINavigationController(rootViewController: mainViewController)
-        navigationController.title = "PokemonList"
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
         

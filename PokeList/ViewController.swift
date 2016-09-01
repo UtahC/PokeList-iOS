@@ -34,10 +34,17 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     let fullScreenSize = UIScreen.mainScreen().bounds.size
     var pokemons: [PokemonInfo] = []
     var tableView: UITableView!
+    var refreshControl: UIRefreshControl!
+    var timer: NSTimer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+//        let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .WhiteLarge)
+//        activityIndicator.center = CGPoint(x: fullScreenSize.width / 2, y: fullScreenSize.height)
+//        activityIndicator.color = UIColor.grayColor()
+//        activityIndicator.backgroundColor = UIColor.redColor()
+//        self.view.addSubview(activityIndicator)
         getData()
         
         // Do any additional setup after loading the view, typically from a nib.
@@ -68,18 +75,38 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         // 是否可以多選 cell
         tableView.allowsMultipleSelection = false
         
+        refreshControl = UIRefreshControl()
+        refreshControl.attributedTitle = NSAttributedString(string: "Pull to reload data.")
+        refreshControl.addTarget(self, action: #selector(beginReloadData), forControlEvents: UIControlEvents.ValueChanged)
+        tableView.addSubview(refreshControl)
+        self.title = "Pokemon List"
+        
         // 加入到畫面中
         self.view.addSubview(tableView)
         
-        var timer = NSTimer()
-        timer.invalidate() // just in case this button is tapped multiple times
-        
         // start the timer
-        timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(actionMethod), userInfo: nil, repeats: true)
+        timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(refreshData), userInfo: nil, repeats: true)
+        
+    }
+
+    func beginReloadData() {
+        timer.invalidate()
+        timer = nil
+        
+        timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(reloadData), userInfo: nil, repeats: false)
         
     }
     
-    func actionMethod() {
+    func reloadData() {
+        refreshControl.beginRefreshing()
+        getData()
+        tableView.reloadInputViews()
+        refreshControl.endRefreshing()
+        
+        timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(refreshData), userInfo: nil, repeats: true)
+    }
+    
+    func refreshData() {
 //        var removedElement : PokemonInfo?
 //        repeat {
 //            if pokemons.first!.until.timeIntervalSinceNow < 0 {
@@ -103,6 +130,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         // 取得 tableView 目前使用的 cell
         let cell = UITableViewCell(style: UITableViewCellStyle.Subtitle, reuseIdentifier: "Cell")
+        
+        guard indexPath.row < pokemons.count else {
+            cell.hidden = true
+            return cell
+        }
+        
+        guard pokemons[indexPath.row].until.timeIntervalSinceNow > 0 else {
+            cell.hidden = true
+            return cell
+        }
         
         // 設置 Accessory 按鈕樣式
         cell.accessoryType = .DisclosureIndicator
@@ -136,10 +173,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         cell.addSubview(subLabel)
         
-        if pokemons[indexPath.row].until.timeIntervalSinceNow < 0 {
-            cell.hidden = true
-        }
-        
         return cell
     }
     
@@ -147,9 +180,11 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         
         var rowHeight:CGFloat = 0.0
         
-        if pokemons[indexPath.row].until.timeIntervalSinceNow < 0 {
+        if indexPath.row >= pokemons.count {
             rowHeight = 0.0
-            
+        }
+        else if pokemons[indexPath.row].until.timeIntervalSinceNow < 0 {
+            rowHeight = 0.0
         }
         else {
             rowHeight = 55.0    //or whatever you like
@@ -160,6 +195,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func getData() {
         let endpoint: String = "http://pokesnipers.com/api/v1/pokemon.json"
+        
+        pokemons = []
+        
         Alamofire.request(.GET, endpoint)
           .responseJSON(completionHandler: { response in
             guard response.result.error == nil else {
