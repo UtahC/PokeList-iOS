@@ -79,14 +79,16 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         refreshControl.attributedTitle = NSAttributedString(string: "Pull to reload data.")
         refreshControl.addTarget(self, action: #selector(beginReloadData), forControlEvents: UIControlEvents.ValueChanged)
         tableView.addSubview(refreshControl)
+        
         self.title = "Pokemon List"
         
         // 加入到畫面中
         self.view.addSubview(tableView)
         
-        // start the timer
+    }
+    
+    override func viewDidAppear(animated: Bool) {
         timer = NSTimer.scheduledTimerWithTimeInterval(1, target: self, selector: #selector(refreshData), userInfo: nil, repeats: true)
-        
     }
 
     func beginReloadData() {
@@ -107,12 +109,6 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func refreshData() {
-//        var removedElement : PokemonInfo?
-//        repeat {
-//            if pokemons.first!.until.timeIntervalSinceNow < 0 {
-//                removedElement = pokemons.removeFirst()
-//            }
-//        } while (removedElement != nil)
         tableView.reloadData()
     }
 
@@ -156,24 +152,32 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
         subLabel.font = subLabel.font.fontWithSize(12)
         subLabel.text = String("in \(Int(pokemons[indexPath.row].until.timeIntervalSinceNow)) sec")
-        
         cell.addSubview(subLabel)
         
         subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 12))
         subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
         subLabel.font = subLabel.font.fontWithSize(12)
         subLabel.text = String(format: "Lat: %10f", pokemons[indexPath.row].coords.latitude)
-        
         cell.addSubview(subLabel)
         
         subLabel = UILabel(frame: CGRect(origin: cell.bounds.origin, size: CGSize(width: cell.bounds.width, height: 15)).offsetBy(dx: 235, dy: 24))
         subLabel.font = UIFont(name: "HelveticaNeue-Bold", size: subLabel.font.pointSize)
         subLabel.font = subLabel.font.fontWithSize(12)
         subLabel.text = String(format: "Lng: %10f", pokemons[indexPath.row].coords.longitude)
-        
         cell.addSubview(subLabel)
         
+//        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(presentPokemonDetail))
+//        gestureRecognizer.numberOfTapsRequired = 1
+//        gestureRecognizer.numberOfTouchesRequired = 1
+//        cell.addGestureRecognizer(gestureRecognizer)
+        
         return cell
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        let pokeInfo = pokemons[indexPath.row]
+        let pokemonViewController = PokemonViewController(pokeInfo: pokeInfo)
+        self.navigationController?.pushViewController(pokemonViewController, animated: true)
     }
     
     func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
@@ -223,37 +227,37 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
             }
         })
     }
+}
+
+public class PokemonInfo {
+    var id: Int
+    var name: String
+    var coords: Coordinate
+    var until: NSDate
+    var iv: Int
+    var attacks: [String?]
+    var icon: String
+    var rarity: String
     
-    class PokemonInfo {
-        var id: Int
-        var name: String
-        var coords: Coordinate
-        var until: NSDate
-        var iv: Int
-        var attacks: [String?]
-        var icon: String
-        var rarity: String
-        
-        init(id: Int, name: String, coords: Coordinate, until: NSDate, iv: Int, attacks: [String?], icon: String, rarity: String) {
-            self.id = id
-            self.name = name
-            self.coords = coords
-            self.until = until
-            self.iv = iv
-            self.attacks = attacks
-            self.icon = icon
-            self.rarity = rarity
-        }
+    init(id: Int, name: String, coords: Coordinate, until: NSDate, iv: Int, attacks: [String?], icon: String, rarity: String) {
+        self.id = id
+        self.name = name
+        self.coords = coords
+        self.until = until
+        self.iv = iv
+        self.attacks = attacks
+        self.icon = icon
+        self.rarity = rarity
     }
+}
+
+public struct Coordinate {
+    var latitude: Double
+    var longitude: Double
     
-    struct Coordinate {
-        var latitude: Double
-        var longitude: Double
-        
-        init (coordsStr: String) {
-            let arr = coordsStr.characters.split(",").map(String.init)
-            latitude = Double(arr[0])!
-            longitude = Double(arr[1])!
-        }
+    init (coordsStr: String) {
+        let arr = coordsStr.characters.split(",").map(String.init)
+        latitude = Double(arr[0])!
+        longitude = Double(arr[1])!
     }
 }

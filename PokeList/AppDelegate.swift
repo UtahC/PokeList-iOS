@@ -8,12 +8,12 @@
 
 import UIKit
 import CoreData
+import GoogleMaps
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
-
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
@@ -24,6 +24,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let navigationController = UINavigationController(rootViewController: mainViewController)
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
+        
+        if let path = NSBundle.mainBundle().pathForResource("Private", ofType: "plist") {
+            if let dictionary = NSDictionary(contentsOfFile: path) {
+                GMSServices.provideAPIKey(dictionary["GoogleMapApiKey"] as! String)
+            }
+        }
         
         return true
     }
